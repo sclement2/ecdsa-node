@@ -1,3 +1,10 @@
+const secp = require("ethereum-cryptography/secp256k1");
+const {
+  utf8ToBytes,
+  toHex,
+  hexToBytes,
+} = require("ethereum-cryptography/utils");
+const { keccak256 } = require("ethereum-cryptography/keccak");
 const express = require("express");
 const app = express();
 const cors = require("cors");
@@ -13,23 +20,51 @@ const balances = {
 };
 
 app.get("/balance/:address", (req, res) => {
-  const { address } = req.params;
+  let { address } = req.params;
   const balance = balances[address] || 0;
   res.send({ balance });
 });
 
 app.post("/send", (req, res) => {
+  /* Get a signature from the client-side application. Recover the public address from the signature and make sure it matches the public sender's public key
+  - const recoveredPublicAddress = secp.recoverPublicKey(messageHash, sig, recoveryBit);
+
+  Possible references:
+  -- https://coinguides.org/sign-verify-bitcoin-address/
+  -- https://github.com/paulmillr/noble-secp256k1#verifysignature-msghash-publickey
+  -- https://ethereum.stackexchange.com/questions/13778/get-public-key-of-any-ethereum-account
+*/
+
   const { sender, recipient, amount } = req.body;
 
-  setInitialBalance(sender);
-  setInitialBalance(recipient);
+  //console.log(req.body);
+  console.log(`Recipient: ${recipient}`);
+  console.log(`Amount: ${amount}`);
+  console.log(`Sender: ${sender.address}`);
+  //console.log(`Sig: ${sender.sig}`);
+  //console.log(`Bit: ${sender.recoveryBit}`);
 
-  if (balances[sender] < amount) {
-    res.status(400).send({ message: "Not enough funds!" });
+  // go from hex to Uint8Array
+  sender.sig = hexToBytes(sender.sig);
+
+  // get the public key from the signature
+  const pubKey = getSenderInfo(sender.sig, sender.recoveryBit);
+
+  // need to run a check to make sure the derived public key and the sender's public key match. This still needs work
+  if (pubKey !== sender.address) {
+    res.status(400).send({ message: "Sending address is not valid!" });
+  } else if (pubKey === recipient) {
+    res.status(400).send({ message: "Can't send funds to yourself!" });
   } else {
-    balances[sender] -= amount;
-    balances[recipient] += amount;
-    res.send({ balance: balances[sender] });
+    setInitialBalance(pubKey);
+    setInitialBalance(recipient);
+    if (balances[pubKey] < amount) {
+      res.status(400).send({ message: "Not enough funds!" });
+    } else {
+      balances[pubKey] -= amount;
+      balances[recipient] += amount;
+      res.send({ balance: balances[pubKey] });
+    }
   }
 });
 
@@ -41,4 +76,11 @@ function setInitialBalance(address) {
   if (!balances[address]) {
     balances[address] = 0;
   }
+}
+
+function getSenderInfo(sig, bit) {
+  let messageHash = keccak256(utf8ToBytes(""));
+  const recoveredPublicAddress = secp.recoverPublicKey(messageHash, sig, bit);
+  console.log("Calculated Key: " + toHex(recoveredPublicAddress));
+  return toHex(recoveredPublicAddress);
 }
