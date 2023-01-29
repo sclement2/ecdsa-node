@@ -7,21 +7,21 @@ function App() {
   const [balance, setBalance] = useState(0);
   const [address, setAddress] = useState("");
   const [privateKey, setPrivateKey] = useState("");
-  const [keyWallet, setKeyWallet] = useState("");
+  const [signature, setSignature] = useState("");
 
   return (
     <div className="app">
       <Wallet
         balance={balance}
         setBalance={setBalance}
-        address={address}
-        setAddress={setAddress}
         privateKey={privateKey}
         setPrivateKey={setPrivateKey}
-        keyWallet={keyWallet}
-        setKeyWallet={setKeyWallet}
+        address={address}
+        setAddress={setAddress}
+        signature={signature}
+        setSignature={setSignature}
       />
-      <Transfer setBalance={setBalance} address={address} />
+      <Transfer setBalance={setBalance} address={signature} />
     </div>
   );
 }

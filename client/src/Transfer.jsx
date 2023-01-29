@@ -1,12 +1,19 @@
 import { useState } from "react";
 import server from "./server";
 
-function Transfer({ address, setBalance }) {
+function Transfer({ setBalance, address }) {
+  //alert("Transfer " + address);
+  /* for (const key in address) {
+    alert("Key: " + key);
+    alert("Value: " + address[key]);
+  }
+  */
+  //alert("TypeOf: " + typeof address);
+  //alert("Balance" + balance);
   const [sendAmount, setSendAmount] = useState("");
   const [recipient, setRecipient] = useState("");
 
   const setValue = (setter) => (evt) => setter(evt.target.value);
-
   async function transfer(evt) {
     evt.preventDefault();
 
@@ -41,7 +48,7 @@ function Transfer({ address, setBalance }) {
         Recipient
         <input
           placeholder="Type an address, for example: 0x2"
-          value={recipient}
+          value={"0x" + recipient}
           onChange={setValue(setRecipient)}
         ></input>
       </label>
