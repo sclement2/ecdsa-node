@@ -1,0 +1,22 @@
+{
+  "name": "cryptography",
+  "version": "1.0.0",
+  "description": "Alchemy Public Key Cryptography",
+  "main": "index.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "test": "mocha"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "chai": "^4.3.7",
+    "mocha": "^10.2.0"
+  },
+  "dependencies": {
+    "dotenv": "^16.0.3",
+    "ethereum-cryptography": "^1.1.2"
+  }
+}
